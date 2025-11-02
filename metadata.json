@@ -1,0 +1,7 @@
+{
+  "name": "Unite ERP",
+  "description": "An interactive web application that generates a detailed solar feasibility report using AI. Users can input project details and receive a comprehensive analysis including energy generation estimates, financial summaries, and environmental benefits, complete with dynamic visualizations and an AI chat assistant.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
