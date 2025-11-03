@@ -99,7 +99,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ setCurrentPage, theme }) =
                     <Button onClick={() => setCurrentPage('generator')} variant="secondary">New Report</Button>
                     <Button onClick={() => setCurrentPage('clients')} variant="secondary">Manage Clients</Button>
                     <Button onClick={() => setCurrentPage('roi-calculator')} variant="secondary">ROI Calculator</Button>
-                    <Button onClick={() => {}} variant="secondary" disabled>Settings</Button>
+                    <Button onClick={() => setCurrentPage('settings')} variant="secondary">Settings</Button>
                 </div>
             </Card>
             <div className="mt-8">

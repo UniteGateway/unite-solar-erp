@@ -20,6 +20,7 @@ import { generateFeasibilityReport, generateAssessmentReport } from './services/
 import { SparklesIcon } from './components/icons/SparklesIcon';
 import { supabase } from './services/supabaseClient';
 import { Session } from '@supabase/supabase-js';
+import { Settings } from './components/Settings';
 
 const LoadingSpinner: React.FC<{ message: string }> = ({ message }) => (
     <div className="flex flex-col items-center justify-center h-full text-center text-foreground dark:text-white p-6">
@@ -280,6 +281,8 @@ const App: React.FC = () => {
                  return <AddFranchiseForm onCancel={() => setCurrentPage('franchise')} onSubmit={() => setCurrentPage('franchise')} />;
             case 'bio-cng':
                 return <BioCngHybrid />;
+            case 'settings':
+                return <Settings />;
             default:
                 return <Dashboard setCurrentPage={setCurrentPage} theme={theme} />;
         }

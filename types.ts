@@ -18,7 +18,8 @@ export type Page =
   | 'project-tracker'
   | 'franchise'
   | 'add-franchise'
-  | 'bio-cng';
+  | 'bio-cng'
+  | 'settings';
 
 export interface FeasibilityFormData {
   companyName: string;

@@ -10,6 +10,7 @@ import { ProjectIcon } from './icons/ProjectIcon';
 import { LogoutIcon } from './icons/LogoutIcon';
 import { Page, User, Role } from '../types';
 import { SpeakerIcon } from './icons/SpeakerIcon'; 
+import { SettingsIcon } from './icons/SettingsIcon';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -28,6 +29,7 @@ const menuItems: { name: string; icon: React.FC<any>; page: Page; allowedRoles?:
   { name: 'Project Tracker', icon: ProjectIcon, page: 'project-tracker', allowedRoles: ['Admin'] },
   { name: 'Franchise Mgt', icon: BuildingIcon, page: 'franchise', allowedRoles: ['Admin'] },
   { name: 'Bio-CNG & Hybrid', icon: LeafIcon, page: 'bio-cng' },
+  { name: 'Settings', icon: SettingsIcon, page: 'settings' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, currentPage, setCurrentPage, onLogout, user }) => {
