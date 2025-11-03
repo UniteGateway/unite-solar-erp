@@ -1,4 +1,3 @@
-
 export type Role = 'Admin' | 'Franchise' | 'Client' | 'Guest' | 'Investor' | 'Partner' | 'Advisor';
 
 export interface User {

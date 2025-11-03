@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Login } from './components/Login';
 import { Sidebar } from './components/Sidebar';
@@ -84,6 +83,11 @@ const App: React.FC = () => {
         });
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+             // Prevent the auth listener from logging out a guest user
+            if (user && user.role === 'Guest' && !session) {
+                return;
+            }
+
             setSession(session);
             if (session) {
                 setUser({ id: session.user.id, name: session.user.email || 'User', role: 'Admin', email: session.user.email || '' });
@@ -93,15 +97,23 @@ const App: React.FC = () => {
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [user]);
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
+        if (user?.role !== 'Guest') {
+            await supabase.auth.signOut();
+        }
+        setUser(null);
+        setCurrentPage('dashboard');
+    };
+
+    const handleGuestLogin = (guestUser: User) => {
+        setUser(guestUser);
         setCurrentPage('dashboard');
     };
 
     const handleGenerateReport = async (formData: FeasibilityFormData) => {
-        if (!session?.user) {
+        if (!user) {
             setError("You must be logged in to generate a report.");
             return;
         }
@@ -112,24 +124,26 @@ const App: React.FC = () => {
         try {
             const reportData = await generateFeasibilityReport(formData);
 
-            // Save to Supabase
-            const { error: dbError } = await supabase.from('feasibility_reports').insert({
-                created_by: session.user.id,
-                company_name: formData.companyName,
-                contact_person: formData.contactPerson,
-                location: formData.location,
-                plant_capacity_kw: formData.plantCapacity,
-                installation_type: formData.installationType,
-                roof_type: formData.roofType,
-                module_brand: formData.moduleBrand,
-                operation_mode: formData.operationMode,
-                power_tariff_inr: formData.powerTariff,
-                amc_preference: formData.amcPreference,
-                insurance: formData.insurance === 'Yes',
-                additional_notes: formData.additionalNotes,
-                report_data: reportData,
-            });
-            if (dbError) throw dbError;
+            // Save to Supabase only if the user is not a guest
+            if (user.role !== 'Guest' && session?.user) {
+                const { error: dbError } = await supabase.from('feasibility_reports').insert({
+                    created_by: session.user.id,
+                    company_name: formData.companyName,
+                    contact_person: formData.contactPerson,
+                    location: formData.location,
+                    plant_capacity_kw: formData.plantCapacity,
+                    installation_type: formData.installationType,
+                    roof_type: formData.roofType,
+                    module_brand: formData.moduleBrand,
+                    operation_mode: formData.operationMode,
+                    power_tariff_inr: formData.powerTariff,
+                    amc_preference: formData.amcPreference,
+                    insurance: formData.insurance === 'Yes',
+                    additional_notes: formData.additionalNotes,
+                    report_data: reportData,
+                });
+                if (dbError) throw dbError;
+            }
 
             const newReport: GeneratedReport = { formData, reportData };
             setCurrentReport(newReport);
@@ -144,7 +158,7 @@ const App: React.FC = () => {
     };
 
     const handleGenerateAssessment = async (formData: AssessmentFormData) => {
-        if (!session?.user) {
+        if (!user) {
             setError("You must be logged in to generate an assessment.");
             return;
         }
@@ -154,7 +168,9 @@ const App: React.FC = () => {
         setCurrentPage('assessmentReportDisplay');
         try {
             let powerBillUrl: string | undefined = undefined;
-            if (formData.powerBillFile && session?.user) {
+
+            // Upload power bill only if the user is not a guest
+            if (formData.powerBillFile && user.role !== 'Guest' && session?.user) {
                 const fileToUpload = typeof formData.powerBillFile === 'string'
                     ? dataURLtoFile(formData.powerBillFile, 'power-bill-capture.png')
                     : formData.powerBillFile;
@@ -173,28 +189,31 @@ const App: React.FC = () => {
             }
 
             const reportData = await generateAssessmentReport(formData);
-
-            // Save to Supabase
-            const { error: dbError } = await supabase.from('assessment_reports').insert({
-                created_by: session.user.id,
-                client_name: formData.clientName,
-                state: formData.state,
-                pincode: formData.pincode,
-                contract_demand_kva: formData.contractDemand,
-                net_units_consumed_kwh: formData.netUnitsConsumed,
-                power_tariff_inr: formData.powerTariff,
-                available_space_sqft: formData.availableSpace,
-                transformer_capacity_kva: formData.transformerCapacity,
-                financing_option: formData.financingOption,
-                cmd_enhancement_cost_inr: formData.cmdEnhancementCost,
-                power_bill_url: powerBillUrl,
-                report_data: reportData,
-            });
-            if (dbError) throw dbError;
+            
+            // Save to Supabase only if the user is not a guest
+            if (user.role !== 'Guest' && session?.user) {
+                const { error: dbError } = await supabase.from('assessment_reports').insert({
+                    created_by: session.user.id,
+                    client_name: formData.clientName,
+                    state: formData.state,
+                    pincode: formData.pincode,
+                    contract_demand_kva: formData.contractDemand,
+                    net_units_consumed_kwh: formData.netUnitsConsumed,
+                    power_tariff_inr: formData.powerTariff,
+                    available_space_sqft: formData.availableSpace,
+                    transformer_capacity_kva: formData.transformerCapacity,
+                    financing_option: formData.financingOption,
+                    cmd_enhancement_cost_inr: formData.cmdEnhancementCost,
+                    power_bill_url: powerBillUrl,
+                    report_data: reportData,
+                });
+                if (dbError) throw dbError;
+            }
 
             const newReport: GeneratedAssessmentReport = { formData, reportData };
             setCurrentAssessmentReport(newReport);
-        } catch (err) {
+        } catch (err)
+ {
             const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
             setError(`Failed to generate assessment: ${errorMessage}`);
             console.error(err);
@@ -267,12 +286,13 @@ const App: React.FC = () => {
     };
 
     if (!user) {
-        return <Login />;
+        return <Login onGuestLogin={handleGuestLogin} />;
     }
 
     return (
         <div className="flex h-screen bg-background dark:bg-solar-black text-foreground dark:text-white font-sans">
             <Sidebar
+                user={user}
                 isCollapsed={isSidebarCollapsed}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}

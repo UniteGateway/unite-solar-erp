@@ -6,10 +6,15 @@ import { supabase } from '../services/supabaseClient';
 import { GoogleIcon } from './icons/GoogleIcon';
 import { AppleIcon } from './icons/AppleIcon';
 import { FacebookIcon } from './icons/FacebookIcon';
+import { User } from '../types';
+
+interface LoginProps {
+  onGuestLogin: (user: User) => void;
+}
 
 const imageUrl = 'https://images.pexels.com/photos/433308/pexels-photo-433308.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2';
 
-export const Login: React.FC = () => {
+export const Login: React.FC<LoginProps> = ({ onGuestLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -32,6 +37,16 @@ export const Login: React.FC = () => {
       setLoading(false);
     }
     // On success, the page will redirect, so no need to set loading to false.
+  };
+  
+  const handleGuestLogin = () => {
+    const guestUser: User = {
+      id: `guest_${Date.now()}`,
+      name: 'Guest User',
+      role: 'Guest',
+      email: 'guest@unitesolar.in',
+    };
+    onGuestLogin(guestUser);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -164,6 +179,16 @@ export const Login: React.FC = () => {
                 </button>
               </div>
             </form>
+
+            <div className="mt-8 text-center">
+                <button 
+                  type="button" 
+                  onClick={handleGuestLogin}
+                  className="text-sm text-muted-foreground dark:text-gray-400 hover:text-primary dark:hover:text-solar-gold underline transition-colors"
+                >
+                  Continue as Guest
+                </button>
+            </div>
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { BoltIcon } from './icons/BoltIcon';
 import { ClientsIcon } from './icons/ClientsIcon';
 import { ProjectIcon } from './icons/ProjectIcon';
 import { LogoutIcon } from './icons/LogoutIcon';
-import { Page } from '../types';
+import { Page, User, Role } from '../types';
 import { SpeakerIcon } from './icons/SpeakerIcon'; 
 
 interface SidebarProps {
@@ -16,20 +16,25 @@ interface SidebarProps {
   currentPage: Page;
   setCurrentPage: (page: Page) => void;
   onLogout: () => void;
+  user: User;
 }
 
-const menuItems = [
-  { name: 'Dashboard', icon: HomeIcon, page: 'dashboard' as Page },
-  { name: 'Assessment Report', icon: SpeakerIcon, page: 'assessment' as Page },
-  { name: 'Feasibility Report', icon: DocumentIcon, page: 'generator' as Page },
-  { name: 'Clients & Reports', icon: ClientsIcon, page: 'clients' as Page },
-  { name: 'ROI Calculator', icon: CalculatorIcon, page: 'roi-calculator' as Page },
-  { name: 'Project Tracker', icon: ProjectIcon, page: 'project-tracker' as Page },
-  { name: 'Franchise Mgt', icon: BuildingIcon, page: 'franchise' as Page },
-  { name: 'Bio-CNG & Hybrid', icon: LeafIcon, page: 'bio-cng' as Page },
+const menuItems: { name: string; icon: React.FC<any>; page: Page; allowedRoles?: Role[] }[] = [
+  { name: 'Dashboard', icon: HomeIcon, page: 'dashboard' },
+  { name: 'Assessment Report', icon: SpeakerIcon, page: 'assessment' },
+  { name: 'Feasibility Report', icon: DocumentIcon, page: 'generator' },
+  { name: 'Clients & Reports', icon: ClientsIcon, page: 'clients', allowedRoles: ['Admin'] },
+  { name: 'ROI Calculator', icon: CalculatorIcon, page: 'roi-calculator' },
+  { name: 'Project Tracker', icon: ProjectIcon, page: 'project-tracker', allowedRoles: ['Admin'] },
+  { name: 'Franchise Mgt', icon: BuildingIcon, page: 'franchise', allowedRoles: ['Admin'] },
+  { name: 'Bio-CNG & Hybrid', icon: LeafIcon, page: 'bio-cng' },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, currentPage, setCurrentPage, onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, currentPage, setCurrentPage, onLogout, user }) => {
+  const visibleMenuItems = menuItems.filter(item => 
+    !item.allowedRoles || item.allowedRoles.includes(user.role)
+  );
+
   return (
     <aside className={`bg-card dark:bg-solar-gray flex-shrink-0 flex flex-col justify-between transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'} border-r border-border dark:border-charcoal-gray`}>
       <div>
@@ -38,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, currentPage, setC
         </div>
         <nav>
           <ul>
-            {menuItems.map((item) => (
+            {visibleMenuItems.map((item) => (
               <li key={item.name} className="px-4">
                 <a
                   href="#"
